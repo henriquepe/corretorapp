@@ -5,7 +5,7 @@
 
 
     <p id="first-p">Você está no modo <strong id="online">ONLINE</strong> </p>
-    <p>Último atualização: 20/11/2020 </p>
+    <p id="second-p">Último atualização: 20/11/2020 </p>
 
     <div class="content">
 
@@ -64,7 +64,7 @@
 
 
     </div>
-
+    <menu-move/>
   </div>
 
 
@@ -74,6 +74,7 @@
 
 import Vue from 'vue';
 import Header from "../components/Header.vue";
+import Menu from '../components/Menu';
 
 import VueApexCharts from 'vue-apexcharts';
 
@@ -84,6 +85,7 @@ export default {
   components: {
     "header-component": Header,
     'apexchart': VueApexCharts,
+    'menu-move': Menu
 
   },
 
@@ -160,18 +162,24 @@ export default {
 
   .container {
 
-    display: flex;
-    flex-direction: column;
     text-align: left;
-    width: 100%;
+    width: fit-content;
     height: 100%;
+    width: 100%;
+    overflow-x: hidden;
 
   }
 
 
 
   #first-p {
-    margin-top: 30px;
+    padding-top: 10px;
+    padding-left: 5%;
+  }
+
+  #second-p {
+    padding-top: 10px;
+    padding-left: 5%;
   }
 
    #online {
@@ -189,6 +197,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 100px;
   }
 
   .content h1 {
@@ -199,13 +208,14 @@ export default {
 
   .container-work{
     width: 80%;
+    max-width: 500px;
     height: 240px;
     padding: 20px;
     margin-top: 20px;
 
     -webkit-box-shadow: 0px 0px 35px -9px rgba(0,0,0,0.25);
     -moz-box-shadow: 0px 0px 35px -9px rgba(0,0,0,0.25);
-    box-shadow: 0px 0px 35px -9px rgba(0,0,0,0.6);
+    box-shadow: 0px 0px 35px -9px rgba(0,0,0,0.3);
 
 
   }

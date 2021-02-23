@@ -20,10 +20,12 @@ export default {
   align-items: center;
   height: 100px;
   background: #05286A;
+  width: 100%;
 }
 
 .header img {
   padding-top: 40px;
   width: 10%;
+  max-width: 100px;
 }
 </style>

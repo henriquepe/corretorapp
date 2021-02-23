@@ -9,6 +9,7 @@ body {
   height: 100vh;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 #app {
@@ -17,7 +18,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  height: 100%;
+
 }
 
 #nav a {

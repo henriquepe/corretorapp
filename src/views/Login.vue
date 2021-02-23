@@ -24,9 +24,12 @@
 
         <a href="esqueciminhasenha">Esqueci a minha senha</a>
 
-        <div class="button-login">
-          <button type="submit">Entrar</button>
-        </div>
+          <router-link to="/corretor" class="button-login">
+
+              <button type="submit">Entrar</button>
+
+          </router-link>
+
       </form>
     </div>
   </div>
@@ -46,10 +49,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  width: 100%;
+  height: 100vh;
+
   background: url("https://images.unsplash.com/photo-1519940616396-2bb690a63a0b?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80");
-  background-image: cover;
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
+
 }
 
 .background-opacity {
@@ -64,6 +71,8 @@ export default {
 
 #logo {
   width: 15%;
+  max-width: 100px;
+  padding-top: 40px;
 }
 
 .background-opacity #welcome {
@@ -93,10 +102,12 @@ form {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding-bottom: 40px;
 }
 
 .input-login {
   width: 58%;
+  max-width: 300px;
   background-color: transparent;
   border: 1px solid #fff;
   height: 40px;
@@ -126,12 +137,14 @@ form a {
 
 .button-login {
   width: 58%;
+  max-width: 300px;
   background-color: #032667;
   border: 1px solid #032667;
   height: 40px;
   display: flex;
   border-radius: 10px;
   transition: opacity 0.2s;
+
 }
 
 .button-login button {
@@ -141,6 +154,7 @@ form a {
   color: #fff;
   cursor: pointer;
   outline: 0;
+
 }
 
 .button-login:hover {
