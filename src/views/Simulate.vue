@@ -4,7 +4,7 @@
 
     <header-component/>
 
-    <h1>Minhas Propostas</h1>
+    <h1>Minhas Simulações</h1>
 
     <div class="content">
 
@@ -15,15 +15,28 @@
         <input id="search-input" type="text" placeholder="Digite algo para buscar"/>
       </div>
 
-      <div class="proposes-box">
+      <div class="simulations-box">
 
-        <propose-box :status="'Em' + ' assinatura'"  :proponentCPF="12345678910" :proponentName="'HENRIQUE' + ' TESTE ' + '4321'" :proposeNumber="13228375327439887249"/>
+        <package-icon size="10x"/>
 
-        <propose-box :status="'Em' + ' assinatura'"  :proponentCPF="12345678910" :proponentName="'HENRIQUE' + ' TESTE ' + '4321'" :proposeNumber="13228375327439887249"/>
-
-        <propose-box :status="'Em' + ' assinatura'"  :proponentCPF="12345678910" :proponentName="'HENRIQUE' + ' TESTE ' + '4321'" :proposeNumber="13228375327439887249"/>
+        <h2>NÃO HÁ SIMULAÇÕES A SEREM EXIBIDAS</h2>
 
       </div>
+
+      <div class="actions-container">
+
+        <router-link to="simulation" class="simulation-button">
+          <refresh-icon size="1.4x"/>
+        </router-link>
+
+        <router-link to="simulation" class="simulation-button">
+          <plus-icon size="1.65x"/>
+        </router-link>
+
+
+      </div>
+
+
 
     </div>
 
@@ -42,17 +55,19 @@
 
 import Header from '../components/Header.vue';
 import Menu from '../components/Menu.vue';
-import { SearchIcon } from 'vue-feather-icons';
-import ProposeBox from '../components/ProposeBox.vue';
+
+import { SearchIcon, PackageIcon, PlusIcon, RefreshCwIcon } from 'vue-feather-icons'
 
 export default {
-  name: 'Proposes',
+  name: 'Simulate',
 
   components: {
     'header-component': Header,
     'menu-move': Menu,
     'search-icon': SearchIcon,
-    'propose-box': ProposeBox,
+    'plus-icon': PlusIcon,
+    'package-icon': PackageIcon,
+    'refresh-icon': RefreshCwIcon
   }
 
 
@@ -70,7 +85,7 @@ export default {
   .container {
     width: 100%;
 
-    height: 100%;
+    height: 100vh;
 
 
   }
@@ -84,10 +99,12 @@ export default {
     width: 95%;
     height: 100%;
 
+
+
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+
 
   }
 
@@ -135,25 +152,64 @@ export default {
 
   }
 
-  .proposes-box {
+  .simulations-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
     width: 95%;
     margin-top: 20px;
-    background: #E0E0E0;
+    height: 100%;
     padding: 1px 1px 5px 1px;
     border-radius: 5px;
 
 
   }
 
-  .propose-box {
-    background: #fff;
-    margin-top: 10px;
-    padding: 20px;
-    border-radius: 10px;
+  .simulations-box svg {
+    justify-content: center;
+    padding-top: 25%;
+    padding-bottom: 10%;
+  }
+
+  .simulations-box h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .actions-container {
+    display: flex;
+    width: 90%;
+    margin-top: 10%;
+    position: fixed;
+    top: 72%;
+    justify-content: space-between;
+    padding-left: 40px;
+    padding-right: 40px;
+
+
+
+  }
+
+  .simulation-button {
+    display: flex;
+    background-color: #05286A;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+  }
+
+  .simulation-button svg {
+    color: #fff;
   }
 
 
 
-</style>>
+
+
+</style>
 
 

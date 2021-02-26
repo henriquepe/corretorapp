@@ -4,7 +4,7 @@
       <home-icon size="2x"/>
       <p>Home</p>
     </router-link>
-    <router-link class="icon-container" to="corretor">
+    <router-link class="icon-container" to="simulate">
       <graph-icon size="2x"/>
       <p>Simulações</p>
     </router-link>
@@ -50,7 +50,10 @@ export default {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     position: fixed;
-    top: 91%;
+    top: 90%;
+
+
+
     background-color: #fff;
 
 
@@ -68,6 +71,8 @@ export default {
     padding-bottom: 10px;
     text-decoration: none;
     color: #000;
+
+    height: 70px;
   }
 
   .icon-container:hover {
