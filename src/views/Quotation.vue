@@ -19,7 +19,7 @@
           </select>
 
           <label for="contract">Contrato*</label>
-          <select v-model="contract" class="list-products-contractss">
+          <select v-model="contract" class="list-products-contracts">
               <option :value="contract">
                 {{contract}}
               </option>
