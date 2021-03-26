@@ -10,6 +10,12 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+
+
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 #app {

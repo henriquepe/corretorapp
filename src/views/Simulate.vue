@@ -90,20 +90,19 @@ export default {
 
   }
 
+
+
+
   .content {
-
-
 
     padding-left: 10px;
     text-align: left;
     width: 95%;
-    height: 100%;
-
-
 
     display: flex;
     flex-direction: column;
     align-items: center;
+
 
 
   }
@@ -153,23 +152,20 @@ export default {
   }
 
   .simulations-box {
+    width: 95%;
+    margin-top: 20px;
+    padding: 1px 1px 5px 1px;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    width: 95%;
-    margin-top: 20px;
-    height: 100%;
-    padding: 1px 1px 5px 1px;
-    border-radius: 5px;
 
 
   }
 
   .simulations-box svg {
-    justify-content: center;
-    padding-top: 25%;
-    padding-bottom: 10%;
+    padding-bottom: 5%;
+    padding-top: 5%;
   }
 
   .simulations-box h2 {
@@ -180,9 +176,8 @@ export default {
   .actions-container {
     display: flex;
     width: 90%;
-    margin-top: 10%;
     position: fixed;
-    top: 72%;
+    top: 80%;
     justify-content: space-between;
     padding-left: 40px;
     padding-right: 40px;

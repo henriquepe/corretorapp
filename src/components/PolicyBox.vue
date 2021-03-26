@@ -3,15 +3,12 @@
       <div class="propose-box">
 
 
-        <strong>Proposta</strong>
+        <strong>Apólice</strong>
         <p>{{proposeNumber}}</p>
         <strong>Proponente</strong>
         <p>{{proponentName}}</p>
         <strong>CPF/CNPJ</strong>
         <p>{{proponentCPF}}</p>
-        <strong>Status</strong>
-        <p>{{status}}</p>
-
 
       </div>
 
@@ -24,7 +21,7 @@
 
 
 export default {
-  name: 'ProposeBox',
+  name: 'PolicyBox',
 
   props: {
     'proposeNumber': String,

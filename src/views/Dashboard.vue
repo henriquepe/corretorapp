@@ -1,8 +1,8 @@
 <template>
   <div class="container">
+
+
     <header-component/>
-
-
 
     <p id="first-p">Você está no modo <strong id="online">ONLINE</strong> </p>
     <p id="second-p">Último atualização: 20/11/2020 </p>
@@ -12,6 +12,7 @@
       <h1>Olá! Este é um resumo do seu trabalho nos últimos 30 dias</h1>
 
       <div class="container-work">
+
         <strong>Cotação</strong>
 
         <div class="graph-container">
@@ -36,7 +37,12 @@
       </div>
 
       <div class="container-work">
+        <loading :active.sync="isLoading"
+          :can-cancel="false"
+          :on-cancel="onCancel"
+          :is-full-page="fullPage"></loading>
         <strong>Propostas</strong>
+
 
         <div class="graph-container">
           <apexchart class="gauge-graph" height="300"  type="radialBar" :options="chartOptions" :series="series2"/>
@@ -75,6 +81,11 @@
 import Vue from 'vue';
 import Header from "../components/Header.vue";
 import Menu from '../components/Menu';
+import store from '../store'
+import axios from 'axios';
+import router from '../router'
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 import VueApexCharts from 'vue-apexcharts';
 
@@ -82,20 +93,36 @@ Vue.use(VueApexCharts);
 
 
 export default {
+  name: 'Dashboard',
+
   components: {
     "header-component": Header,
     'apexchart': VueApexCharts,
-    'menu-move': Menu
+    'menu-move': Menu,
+    Loading
 
   },
 
+  // created: () => {
+
+
+
+  // },
+
   data: function() {
     return {
-
+          isLoading: true,
+          fullPage: true,
+          quantityOfProposes: 0,
+          state: store.state,
+          digitalizacao: 0,
+          assinatura: 0,
+          aceito: 0,
+          declinado: 0,
           colors: ['#1ab7ea', '#0084ff', '#39539E', '#0077B5'],
           labels: ['Em digitalização', 'Em assinatura', 'Aceito', 'Declinado'],
-          series: [76, 80, 10, 40],
-          series2: [100, 40, 80, 10],
+          series: [],
+          series2: [],
           chartOptions: {
             chart: {
               type: 'radialBar',
@@ -152,7 +179,251 @@ export default {
             },
             colors: ['#1ab7ea', '#0084ff', '#39539E', '#0077B5'],
             labels: ['Em digitalização', 'Em assinatura', 'Aceito', 'Declinado'],
-          }}},
+          }}
+  },
+
+  methods: {
+    async handleGraphicStatus(){
+
+      const sessionIdInLocalStorage = localStorage.getItem('@corretor-session-id');
+
+
+
+      const { data } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2',
+      {"SessionID": sessionIdInLocalStorage,"screenIdentification":"SASVI0108","Parameters":[{"parametername":"nr_proposta", "parametervalue":""},{"parametername":"cd_fase", "parametervalue":""}]}
+      )
+
+      if(data.ResponseCode === 999 && data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
+
+        await router.replace({path: '/'})
+        alert('Sessão expirada')
+      }
+
+      this.state.proposes = data.ResponseJSONData.Proposta_VI.Infos_Proposta;
+
+
+      const { data: quoteData  } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2',
+        {"SessionID": sessionIdInLocalStorage,"screenIdentification":"SASVI0081",
+        "Parameters":[
+        {"parametername":"nr_cotacao","parametervalue":""},
+        {"parametername":"cd_fase","parametervalue":""}
+        ]})
+
+        if(quoteData.ResponseCode === 999 && quoteData.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
+
+          await router.replace({path: '/'})
+          alert('Sessão expirada')
+        }
+
+
+        this.state.quotes = quoteData.ResponseJSONData.Simulador_VI.Infos_simulacao;
+
+
+
+
+
+
+    },
+
+
+
+    handleEmDigitalizacaoPercentage(){
+
+      if(this.state.proposes.length === 0){
+        return;
+      }
+      else {
+        const emDigitalizacaoData = this.state.proposes.filter(propose => propose.nm_fase === 'Em Digitalizacao');
+
+
+        const propostaEmDigitalizacaoPorcentagem = ((emDigitalizacaoData.length*100) / this.state.proposes.length);
+
+        this.state.propostaEmDigitalizacao = Math.round(propostaEmDigitalizacaoPorcentagem);
+
+        if(this.state.quotes.length === 0){
+          return;
+        }
+        else {
+          const cotacaoEmDigitalizacaoData = this.state.quotes.filter(quote => quote.nm_fase === 'Em Digitação');
+
+
+          console.log('cotacao em digitalizacao:' + cotacaoEmDigitalizacaoData.length)
+
+          const cotacaoEmDigitalizacaoPorcentagem = ((cotacaoEmDigitalizacaoData.length*100) / this.state.quotes.length);
+
+          this.state.cotacaoEmDigitacao = Math.round(cotacaoEmDigitalizacaoPorcentagem);
+        }
+      }
+
+
+
+
+
+    },
+
+
+    handleEmAssinaturaPercentage(){
+
+      if(this.state.proposes.length === 0){
+        return;
+      }
+      else {
+        const emAssinaturaData = this.state.proposes.filter(propose => propose.nm_fase === 'Em Assinatura');
+
+
+        const propostaEmAssinaturaPorcentagem = ((emAssinaturaData.length*100) / this.state.proposes.length);
+
+        this.state.propostaEmAssinatura = Math.round(propostaEmAssinaturaPorcentagem);
+
+        if(this.state.quotes.length === 0){
+          return;
+        }
+        else {
+          const cotacaoEmAssinaturaData = this.state.quotes.filter(quote => quote.nm_fase === 'Em Assinatura');
+
+          console.log('cotacao em assinatura:' + cotacaoEmAssinaturaData.length)
+          const cotacaoEmAssinaturaPorcentagem = ((cotacaoEmAssinaturaData.length*100) / this.state.quotes.length);
+
+          this.state.cotacaoEmAssinatura = Math.round(cotacaoEmAssinaturaPorcentagem);
+        }
+      }
+
+
+
+
+
+    },
+
+    handleEmDeclinadoPercentage(){
+
+      if(this.state.proposes.length === 0){
+        return;
+      }
+      else {
+        const emDeclinadoData = this.state.proposes.filter(propose => propose.nm_fase === 'Cancelada');
+
+
+        const propostaEmDeclinadoPorcentagem = ((emDeclinadoData.length*100) / this.state.proposes.length);
+
+        this.state.propostaDeclinado = Math.round(propostaEmDeclinadoPorcentagem);
+
+        if(this.state.quotes.length === 0){
+          return;
+        }
+        else {
+          const cotacaoEmDeclinadoData = this.state.quotes.filter(quote => quote.nm_fase === 'Cancelada');
+
+          console.log('cotacao em declinado:' + cotacaoEmDeclinadoData.length)
+
+          const cotacaoEmDeclinadoPorcentagem = ((cotacaoEmDeclinadoData.length*100) / this.state.quotes.length);
+
+          this.state.cotacaoEmDeclinado = Math.round(cotacaoEmDeclinadoPorcentagem);
+        }
+      }
+
+
+
+
+
+    },
+
+    handleEmAceitoPercentage(){
+
+      if(this.state.proposes.length === 0){
+        return;
+      }
+      else {
+        const emAceitoData = this.state.proposes.filter(propose => propose.nm_fase === 'Aceito');
+
+
+        const propostaEmAceitoPorcentagem = ((emAceitoData.length*100) / this.state.proposes.length);
+
+        this.state.propostaAceito = Math.round(propostaEmAceitoPorcentagem);
+
+        if(this.state.quotes.length === 0){
+          return;
+        }
+        else {
+          const cotacaoEmAceito = this.state.quotes.filter(quote => quote.nm_fase === 'Aceito');
+
+          console.log('cotacao em aceito:' + cotacaoEmAceito.length)
+          const cotacaoEmAceitoPorcentagem = ((cotacaoEmAceito.length*100) / this.state.quotes.length);
+
+          this.state.cotacaoEmAceito = Math.round(cotacaoEmAceitoPorcentagem);
+        }
+      }
+
+
+
+
+
+    },
+
+    async handleGraphicsValue(){
+
+
+      console.log('executada')
+
+      Vue.set(this.series, 0, this.state.cotacaoEmDigitacao);
+      Vue.set(this.series, 1, this.state.cotacaoEmAssinatura);
+      Vue.set(this.series, 2, this.state.cotacaoEmDeclinado);
+      Vue.set(this.series, 3, this.state.cotacaoEmAceito);
+
+
+      Vue.set(this.series2, 0, this.state.propostaEmDigitalizacao);
+      Vue.set(this.series2, 1, this.state.propostaEmAssinatura);
+      Vue.set(this.series2, 2, this.state.propostaDeclinado);
+      Vue.set(this.series2, 3, this.state.propostaAceito);
+
+      this.isLoading = false;
+
+
+      return true;
+
+    },
+
+    async handlePercentages(){
+
+      await this.handleGraphicStatus()
+
+      this.handleEmAssinaturaPercentage()
+      this.handleEmDeclinadoPercentage()
+      this.handleEmAceitoPercentage()
+      this.handleEmDigitalizacaoPercentage()
+
+
+
+      return true;
+
+    }
+
+  },
+
+
+
+
+
+
+  async created(){
+
+
+
+    await this.handlePercentages();
+
+
+
+    setTimeout(async() => {
+
+      await this.handleGraphicsValue();
+
+    }, 3000);
+
+
+
+
+  },
+
+
 
 
 }

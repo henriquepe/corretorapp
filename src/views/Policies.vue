@@ -4,7 +4,7 @@
 
     <header-component/>
 
-    <h1>Minhas Propostas</h1>
+    <h1>Minhas Apólices</h1>
 
     <div class="content">
 
@@ -18,12 +18,17 @@
       <div  class="proposes-box">
 
         <ul>
-          <li v-for="(propose) in this.state.proposes" :key="propose.nr_proposta">
-            <router-link :to="{path: '/proposes/' + propose.nr_proposta, params: {id: propose.nr_proposta} }">
-              <propose-box :idProp="propose.nr_proposta" :status="propose.nm_fase"  :proponentCPF="propose.nr_cpf" :proponentName="propose.nm_pessoa" :proposeNumber="propose.nr_proposta"/>
+          <li v-for="policy in state.policies" :key="policy.nr_apolice">
+            <router-link :to="{path: '/policies/' + policy.nr_apolice, params: {id: policy.nr_apolice} }">
+              <policy-box   :idProp="policy.nr_apolice" :status="policy.nm_status"  :proponentCPF="policy.nr_CNPJ_sub" :proponentName="policy.nm_estipulante" :proposeNumber="policy.nr_apolice"/>
             </router-link>
           </li>
         </ul>
+
+
+
+
+
 
       </div>
 
@@ -45,25 +50,34 @@
 import Header from '../components/Header.vue';
 import Menu from '../components/Menu.vue';
 import { SearchIcon } from 'vue-feather-icons';
-import ProposeBox from '../components/ProposeBox.vue';
-import Vue from 'vue';
-
-import router from '../router'
-
-
-
-
+import PolicyBox from '../components/PolicyBox.vue';
 import axios from 'axios';
 
-import store from '../store';
+import store from '../store/index';
 
 export default {
-  name: 'Proposes',
+  name: 'Policies',
+
+  data: () => {
+
+
+    return {
+      state: store.state,
+      policiesArray: store.state.policies
+    }
+  },
+
+  components: {
+    'header-component': Header,
+    'menu-move': Menu,
+    'search-icon': SearchIcon,
+    'policy-box': PolicyBox,
+  },
 
   methods: {
-    setProposesArray(newProposesArray){
+    setPoliciesArray(newPoliciesArray){
 
-      this.proposesArray = newProposesArray;
+      this.policiesArray = newPoliciesArray;
 
 
     },
@@ -72,27 +86,20 @@ export default {
 
       const sessionIdInLocalStorage = localStorage.getItem('@corretor-session-id');
 
-      if(this.state.proposes.length === 0){
+      if(this.state.policies.length === 0){
         const { data } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2',
-          {"SessionID": sessionIdInLocalStorage,"screenIdentification":"SASVI0108","Parameters":[{"parametername":"nr_proposta", "parametervalue":""},{"parametername":"cd_fase", "parametervalue":""}]}
-        )
+        {
+        "SessionID":sessionIdInLocalStorage,
+        "screenIdentification":"SASVI0118A",
+        "Parameters":[ {"parametername": "nr_apolice","parametervalue": ""}, {"parametername": "nr_ramo","parametervalue": ""}, {"parametername": "cd_status","parametervalue": ""}, {"parametername": "nr_cpf","parametervalue": ""}, {"parametername": "nr_bilhete","parametervalue": ""}, {"parametername": "nr_CPF_CNPJ_login","parametervalue": ""}, {"parametername": "nr_contrato","parametervalue": ""}, {"parametername": "nr_sub","parametervalue": ""}, {"parametername": "nm_login","parametervalue": "3131181"} ]})
 
-      if(data.ResponseCode === 999 && data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
-
-        await router.replace({path: '/'})
-        alert('Sessão expirada')
+        store.state.policies = data.ResponseJSONData.Apolice_Resumo_table_1;
       }
 
-      store.state.proposes = data.ResponseJSONData.Proposta_VI.Infos_Proposta;
-      }
-      // this.setProposesArray(response.data.ResponseJSONData.Proposta_VI.Infos_Proposta);
+      const newPoliciesArray = data.ResponseJSONData.Apolice_Resumo_table_1;
 
-      const newProposesArray = data.ResponseJSONData.Proposta_VI.Infos_Proposta;
-
-
-
-      if(this.proposesArray.length === 0){
-        this.setProposesArray(newProposesArray)
+      if(this.policiesArray.length === 0){
+        this.setPoliciesArray(newPoliciesArray)
       }
       else {
         return;
@@ -102,44 +109,14 @@ export default {
     }
   },
 
-    async created() {
+  async created() {
 
-      await this.verifyExistentProposes()
+    await this.verifyExistentProposes()
 
-
-    },
-
-    beforeCreate(){
-      this.proposesArray = store.state.proposes;
-    },
-
-  data(){
-
-    return {
-      state: store.state,
-      proposesArray: []
-    }
 
   },
 
-  components: {
-    'header-component': Header,
-    'menu-move': Menu,
-    'search-icon': SearchIcon,
-    'propose-box': ProposeBox,
-  },
 
-
-
-
-
-
-
-  // methods: {
-  //   getProposesInStore(){
-  //     return store.state.proposes;
-  //   }
-  // }
 
 }
 </script>
@@ -159,8 +136,6 @@ export default {
 
   }
 
-
-
   .content {
 
 
@@ -175,11 +150,6 @@ export default {
     align-items: center;
     justify-content: center;
 
-  }
-
-  #nr_proposta {
-    color: #000;
-    height: 10px;
   }
 
 
@@ -232,7 +202,6 @@ export default {
     background: #E0E0E0;
     padding: 1px 1px 5px 1px;
     border-radius: 5px;
-
 
 
   }

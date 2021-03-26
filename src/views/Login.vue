@@ -1,5 +1,11 @@
 <template>
   <div class="home">
+
+    <loading :active.sync="isLoading"
+    :can-cancel="true"
+    :on-cancel="onCancel"
+    :is-full-page="fullPage"></loading>
+
     <div class="background-opacity">
       <img
         id="logo"
@@ -16,21 +22,26 @@
 
       <form>
         <div class="input-login">
-          <input type="text" placeholder="Nome de usuário" />
+          <input name="usuario" id="usuario" type="text" placeholder="Nome de usuário" />
         </div>
         <div class="input-login">
-          <input type="text" placeholder="Senha" />
+          <input name="senha" id="senha" type="password" placeholder="Senha" />
         </div>
 
         <a href="esqueciminhasenha">Esqueci a minha senha</a>
 
-          <router-link to="/corretor" class="button-login">
+          <!-- <router-link to="/corretor" class="button-login">
 
-              <button type="submit">Entrar</button>
 
-          </router-link>
+
+          </router-link> -->
+        <div class="button-login">
+          <button v-on:click="handleSubmit" type="submit">Entrar</button>
+        </div>
+
 
       </form>
+
     </div>
   </div>
 </template>
@@ -38,9 +49,184 @@
 
 
 <script lang="ts">
-export default {
-  name: 'Login'
+
+import Loading from 'vue-loading-overlay';
+
+import 'vue-loading-overlay/dist/vue-loading.css';
+
+import router from '../router';
+
+import store from '../store'
+
+
+
+
+interface handleSubmitProps{
+  usuario: string;
+  senha: string;
+  errors: string[];
 }
+
+export default {
+  name: 'Login',
+
+  data: function(){
+    return {
+      usuario: '' as string,
+      senha: '' as string,
+      errors: [] as string[],
+      isLoading: false,
+      fullPage: false
+    }
+  },
+  components:  {
+    Loading
+  },
+
+  methods: {
+    handleSubmit<handleSubmitProps>(e: Event){
+
+      this.isLoading = true;
+
+      this.usuario = (document.getElementById('usuario') as HTMLInputElement).value;
+
+      this.senha = (document.getElementById('senha') as HTMLInputElement).value as any;
+
+
+
+      this.errors = [] as any[];
+
+
+
+      if(!this.usuario || !this.senha){
+        this.errors.push('Usuario e senha são obrigatórios!');
+      };
+
+      if(this.errors.length <= 0){
+
+        this.login(this.usuario, this.senha).then(
+          loginStatus => {
+
+
+            if(loginStatus && store.state.token){
+              router.replace({path: '/corretor'})
+              e.preventDefault();
+            }
+
+            else {
+              this.errors.forEach(error => alert(error))
+              e.preventDefault();
+              return
+            }
+
+            e.preventDefault();
+          }
+        );
+
+
+
+
+      }
+
+
+      e.preventDefault();
+
+
+
+
+
+    },
+
+    async login(usuario: string, senha: string){
+
+      // 3131181
+      // Omint2020
+
+      const authObj = {
+        "screenIdentification":"SASVI0055",
+          "Parameters":
+          [
+            {
+              "parametername": "cd_Corretor",
+              "parametervalue": usuario
+            },
+            {
+              "parametername": "Senha",
+              "parametervalue": senha
+            }
+          ]
+      }
+
+      const authResponse = await fetch('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(authObj)
+      });
+
+      const authResponseInJSON = await authResponse.json();
+
+      if(authResponseInJSON.ResponseCode ===  999){
+        this.errors.push('Usuário ou senha incorretos');
+        this.isLoading = false;
+
+        return false
+      }
+
+      console.log(authResponseInJSON)
+
+
+
+      console.log(authResponseInJSON.ResponseCode);
+
+      const { Token } =  JSON.parse(authResponseInJSON.ResponseJSONData);
+
+      localStorage.setItem('@corretor-token', Token);
+
+      const sessionObj = {
+        "userToken": Token,
+        "screenIdentification":"SASVI0056"
+      };
+
+
+
+
+        const sessionResponse = await fetch('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(sessionObj)
+        })
+
+        const sessionResponseInJSON = await sessionResponse.json();
+
+
+        const { SessionID } =  JSON.parse(sessionResponseInJSON.ResponseJSONData);
+
+        console.log(SessionID)
+
+        await store.dispatch('setTokenAndSessionId', {
+          token: Token,
+          sessionId: SessionID
+        })
+
+        localStorage.setItem('@corretor-session-id', SessionID);
+
+        return true
+
+    }
+
+
+  },
+
+
+}
+
+
 
 </script>
 
