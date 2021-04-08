@@ -97,6 +97,8 @@ export default {
           alert('Sessão expirada')
         }
 
+        console.log(data)
+
 
 
         store.state.quotes = data.ResponseJSONData.Simulador_VI.Infos_simulacao;

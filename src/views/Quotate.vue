@@ -37,12 +37,13 @@
             <p>{{this.estipulante}}</p>
           </div>
 
-
-
-
-
-
         </div>
+
+        <ul v-for="cobertura in coberturas" :key="cobertura.nm_cobertura">
+          <li>
+            <strong>cobertura.nm_cobertura</strong>
+          </li>
+        </ul>
 
       </div>
 
@@ -81,16 +82,13 @@ export default {
       followUp: [],
       produto: '',
       estipulante: '',
-      historico: "Histórico\de\Follow-Up\da\Cotação"
+      historico: "Histórico\de\Follow-Up\da\Cotação",
+      coberturas: [],
 
     }
   },
 
   async created () {
-
-    console.log(this.id)
-
-
 
     const quote = store.state.quotes.find(quoteInState => quoteInState.dt_validade === this.id);
     this.status = quote.nm_fase;
@@ -100,8 +98,30 @@ export default {
     this.produto = quote.cd_produto;
     this.estipulante = quote.nm_usuario_proprietario;
 
+    this.handleCoberturasData();
+
 
   },
+
+  methods: {
+    async handleCoberturasData(){
+
+      const sessionID = localStorage.getItem('@corretor-session-id');
+
+      const response = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
+        "SessionID": sessionID,
+        "screenIdentification":"SASVI0063",
+        "Parameters":[
+          {"parametername":"nr_cotacao","parametervalue": this.proposta}
+        ]}
+      );
+
+      this.coberturas = response.data.ResponseJSONData.Simulador_VI.Infos_Simulador.sim.Infos_Coberturas.c;
+
+
+
+    },
+  }
 
 
 

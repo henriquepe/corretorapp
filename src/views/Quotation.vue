@@ -1,5 +1,7 @@
 <template>
   <div class="container">
+    <loading :active.sync="isLoading" :can-cancel="false" :on-cancel="onCancel" :is-full-page="fullPage">
+    </loading>
     <form class="content">
       <header-component/>
       <router-link to="/quotations" class="left-icon">
@@ -98,9 +100,9 @@
         <div class="form-proponent">
 
           <ul class="coberturas">
-            <li v-for="cobertura in this.state.coberturas" :key="cobertura.id_cobertura" class="cobertura">
+            <li v-for="cobertura in this.state.coberturas" :key="cobertura.id_produto_cobertura" class="cobertura">
               <label for="cobertura">{{cobertura.nm_cobertura}}</label>
-              <input v-on:input="handle($event, cobertura.id_cobertura)" placeholder="0,00" id="input-cobertura" type="text">
+              <input v-on:input="handle($event, cobertura.id_produto_cobertura)" placeholder="0,00" id="input-cobertura" type="text">
             </li>
           </ul>
 
@@ -128,6 +130,7 @@ import Vue from 'vue'
 import VueMaterial from 'vue-material';
 import axios from 'axios';
 import store from '../store';
+import Loading from 'vue-loading-overlay';
 
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
@@ -142,7 +145,8 @@ export default {
   components: {
     'header-component': Header,
     'left-icon': ChevronLeftIcon,
-    'menu-component': Menu
+    'menu-component': Menu,
+    Loading
   },
   data: () => {
     return {
@@ -173,7 +177,8 @@ export default {
       birth: '',
       email: '',
       cpf: '',
-      loading: false
+      isLoading: true,
+      fullPage: true
 
 
     }
@@ -184,6 +189,8 @@ export default {
   methods: {
 
       async submit(){
+
+        this.isLoading = true;
 
         const sessionId = localStorage.getItem('@corretor-session-id');
 
@@ -203,7 +210,7 @@ export default {
             { "parametername":"cd_ocupacao", "parametervalue": this.cdProfession },
             { "parametername":"vl_renda_mensal", "parametervalue": this.renda },
             { "parametername":"nm_email", "parametervalue": this.email },
-            { "parametername":"nr_cpf", "parametervalue": this.email },
+            { "parametername":"nr_cpf", "parametervalue": this.cpf },
             { "parametername":"ic_seg_vida_vigente", "parametervalue":"0" },
             { "parametername":"id_seguradora", "parametervalue":"0" },
             { "parametername":"vl_capital_outra_seguradora", "parametervalue":"0" },
@@ -211,14 +218,23 @@ export default {
           ]
         });
 
+
+
+
+
         if(response.data.ResponseCode === 999 && response.data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
 
           await router.replace({path: '/'})
           alert('Sessão expirada')
+
         }
 
+        console.log(response.data.ResponseCode === 0);
 
-
+        if(response.data){
+          store.state.quotes = [];
+          router.replace('/quotations')
+        }
 
 
       },
@@ -227,7 +243,7 @@ export default {
 
       handleCPFInputChange(e){
 
-        this.cpf = e.target.value;
+        this.cpf = e.target.value.toString();
 
         console.log('cpf:', this.cpf)
 
@@ -236,7 +252,7 @@ export default {
 
       handleEmailInputChange(e){
 
-        this.email = e.target.value;
+        this.email = e.target.value.toString();
 
         console.log('email:', this.email)
 
@@ -244,7 +260,7 @@ export default {
 
       handleRendaInputChange(e){
 
-        this.renda = e.target.value;
+        this.renda = e.target.value.toString();
 
         console.log('renda:', this.renda)
 
@@ -253,7 +269,7 @@ export default {
 
       handleNomeInputChange(e){
 
-        this.nome = e.target.value;
+        this.nome = e.target.value.toString();
 
         console.log('nome:', this.nome)
 
@@ -265,7 +281,7 @@ export default {
 
         const formatedDate = `${data[0]}${data[1]}${data[2]}`
 
-        this.birth = formatedDate;
+        this.birth = formatedDate.toString();
 
         console.log('data de nascimento:', this.birth)
 
@@ -279,15 +295,15 @@ export default {
         const cobertura =
         {"parametername":"cobertura",
           "parameterlist":[
-            {"parametername":"id_cobertura", "parametervalue": id },
-            { "parametername":"vl_capital_segurado", "parametervalue": e.target.value }
+            {"parametername":"id_cobertura", "parametervalue": id.toString() },
+            { "parametername":"vl_capital_segurado", "parametervalue": e.target.value.toString() }
           ]
         }
 
-        console.log('id passado:', id)
+        console.log('id passado:', id.toString())
 
-        const coberturaExists = this.coberturaList.find(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id);
-        const coberturaIndexExists = this.coberturaList.findIndex(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id);
+        const coberturaExists = this.coberturaList.find(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id.toString());
+        const coberturaIndexExists = this.coberturaList.findIndex(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id.toString());
 
         if(!coberturaExists){
           this.coberturaList.push(cobertura);
@@ -297,6 +313,8 @@ export default {
           this.coberturaList.splice(coberturaIndexExists, 1);
           this.coberturaList.push(cobertura)
 
+          console.log(this.coberturaList)
+
         }
 
       },
@@ -304,7 +322,7 @@ export default {
 
       async handleChange(e){
 
-        this.valorCobertura = e.target.value;
+        this.valorCobertura = e.target.value.toString();
 
       },
 
@@ -313,10 +331,10 @@ export default {
 
         const matchedProduct = this.state.products.find(product => product.nm_produto === this.product);
 
-        this.contract = matchedProduct.nm_contrato;
-        this.cdContract = matchedProduct.cd_contrato;
-        this.cdProduct = matchedProduct.cd_produto;
-        this.id_canal_venda = matchedProduct.Canal_Venda.cv.id_canal_venda;
+        this.contract = matchedProduct.nm_contrato.toString();
+        this.cdContract = matchedProduct.cd_contrato.toString();
+        this.cdProduct = matchedProduct.cd_produto.toString();
+        this.id_canal_venda = matchedProduct.Canal_Venda.cv.id_canal_venda.toString();
 
         console.log('código contrato:', this.cdContract);
         console.log('código produto:', this.cdProduct);
@@ -324,8 +342,9 @@ export default {
 
 
           await this.handleProfessions();
-          await this.handleFatoresDeCarregamento();
           await this.handleCoberturas();
+          await this.handleFatoresDeCarregamento();
+
 
 
 
@@ -336,12 +355,18 @@ export default {
 
         const sessionId = localStorage.getItem('@corretor-session-id')
 
+        this.isLoading = true;
+
         const { data: coberturasData } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
           "SessionID": sessionId,
           "screenIdentification":"SASVI0068",
           "Parameters":[
             {"parametername":"cd_produto", "parametervalue": this.cdProduct}
           ]})
+
+          if(coberturasData){
+            this.isLoading = false;
+          }
 
 
         this.state.coberturas = coberturasData.ResponseJSONData;
@@ -365,6 +390,8 @@ export default {
       },
 
       handleChangeSex(){
+
+        this.sexCode = this.sexCode.toString();
 
         console.log('cd sexo:', this.sexCode);
 
@@ -391,7 +418,7 @@ export default {
 
         const matchedCorretor = this.state.corretores.find(corretor => corretor.nm_co_corretor === this.corretor)
 
-        this.nr_cnpj_co_corretor = matchedCorretor.nr_cnpj_co_corretor;
+        this.nr_cnpj_co_corretor = matchedCorretor.nr_cnpj_co_corretor.toString();
 
         console.log('nr cnpj co-corretor:', this.nr_cnpj_co_corretor);
 
@@ -415,7 +442,7 @@ export default {
         const matchedFator = this.state.fatoresDeCarregamento.find(fator => fator.cd_Fator === this.fatorCarregamento);
 
 
-        this.id_fator_carregamento = matchedFator.id_fator_carregamento;
+        this.id_fator_carregamento = matchedFator.id_fator_carregamento.toString();
 
         console.log('id fator carregamento:', this.id_fator_carregamento);
 
@@ -423,10 +450,9 @@ export default {
 
       async handleProfessions(){
 
-
-
-
         const sessionId = localStorage.getItem('@corretor-session-id')
+
+        this.isLoading = true;
 
         const { data: professionsData } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
         "SessionID":sessionId,
@@ -434,6 +460,10 @@ export default {
         "Parameters":[
           {"parametername":"cd_produto", "parametervalue": this.cdProduct}
         ]})
+
+        if(professionsData){
+          this.isLoading = false;
+        }
 
         if(professionsData.ResponseCode === 999 && professionsData.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
 
@@ -461,6 +491,9 @@ export default {
 
   async created() {
 
+    store.state.coberturas = [];
+    store.state.professions = [];
+
     const sessionId = localStorage.getItem('@corretor-session-id')
 
       const {data:productsData} = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
@@ -470,18 +503,22 @@ export default {
 	        {"parametername": "cd_tp_consulta", "parametervalue": "2"}
         ]})
 
-        if(productsData.ResponseCode === 999 && productsData.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
+      if(productsData){
+        this.isLoading = false;
+      }
 
-          await router.replace({path: '/'})
-          alert('Sessão expirada')
-        }
+      if(productsData.ResponseCode === 999 && productsData.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
 
-        this.state.products = productsData.ResponseJSONData.Produtos.prod;
+        await router.replace({path: '/'})
+        alert('Sessão expirada')
+      }
+
+      this.state.products = productsData.ResponseJSONData.Produtos.prod;
 
 
 
-        await this.handleCorretores();
-        await this.handleSex();
+      await this.handleCorretores();
+      await this.handleSex();
 
 
 

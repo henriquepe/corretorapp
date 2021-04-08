@@ -14,15 +14,24 @@
     <strong >PROPONENTE</strong>
     <p>{{proponente}}</p>
 
-
-
   </div>
 
 </template>
 
 <script>
+
+import axios from 'axios';
+
 export default {
   name: 'QuotationBox',
+
+  data(){
+
+    return {
+      coberturas: [],
+    }
+
+  },
 
   props: {
     'proponente': String,
@@ -30,9 +39,7 @@ export default {
     'validade': String,
     'status': String,
     'proposta': String
-  }
-
-
+  },
 
 }
 </script>
