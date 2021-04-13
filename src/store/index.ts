@@ -37,7 +37,8 @@ export default new Vuex.Store({
     cotacaoEmAssinatura: 0,
     cotacaoEmDeclinado: 0,
     cotacaoEmAceito: 0,
-    quoteCreated: false
+    quoteCreated: false,
+    coberturasSpecifQuotate: []
 
 
 

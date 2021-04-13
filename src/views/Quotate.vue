@@ -32,18 +32,26 @@
             <p>{{this.produto}}</p>
           </div>
 
-          <div>
+          <div v-if="state.coberturasSpecifQuotate.length === 0" style="flex: 1; height: 100vh;">
             <strong>Estipulante</strong>
             <p>{{this.estipulante}}</p>
           </div>
 
+          <div v-if="state.coberturasSpecifQuotate.length >= 1">
+            <strong>Estipulante</strong>
+            <p>{{this.estipulante}}</p>
+          </div>
+
+          <ul v-if="state.coberturasSpecifQuotate">
+            <li v-for="cobertura in state.coberturasSpecifQuotate" :key="cobertura.nm_cobertura" class="cobertura-list">
+              <strong>{{cobertura.nm_cobertura}}</strong>
+              <p>Valor capital segurado: {{cobertura.vl_capital_segurado}}</p>
+            </li>
+          </ul>
+
         </div>
 
-        <ul v-for="cobertura in coberturas" :key="cobertura.nm_cobertura">
-          <li>
-            <strong>cobertura.nm_cobertura</strong>
-          </li>
-        </ul>
+
 
       </div>
 
@@ -83,12 +91,12 @@ export default {
       produto: '',
       estipulante: '',
       historico: "Histórico\de\Follow-Up\da\Cotação",
-      coberturas: [],
+      state: store.state,
 
     }
   },
 
-  async created () {
+  created () {
 
     const quote = store.state.quotes.find(quoteInState => quoteInState.dt_validade === this.id);
     this.status = quote.nm_fase;
@@ -98,6 +106,8 @@ export default {
     this.produto = quote.cd_produto;
     this.estipulante = quote.nm_usuario_proprietario;
 
+
+
     this.handleCoberturasData();
 
 
@@ -105,6 +115,10 @@ export default {
 
   methods: {
     async handleCoberturasData(){
+
+      store.state.coberturasSpecifQuotate = [];
+
+
 
       const sessionID = localStorage.getItem('@corretor-session-id');
 
@@ -116,7 +130,28 @@ export default {
         ]}
       );
 
-      this.coberturas = response.data.ResponseJSONData.Simulador_VI.Infos_Simulador.sim.Infos_Coberturas.c;
+      // console.log(response.data.ResponseJSONData.Simulador_VI.Infos_Coberturas.c);
+
+      const coberturasListFromServer = response.data.ResponseJSONData.Simulador_VI.Infos_Coberturas.c;
+
+
+      if(!coberturasListFromServer.length){
+        store.state.coberturasSpecifQuotate.push(coberturasListFromServer);
+        console.log(store.state.coberturasSpecifQuotate)
+      }
+      else {
+        store.state.coberturasSpecifQuotate = coberturasListFromServer;
+      }
+
+      console.log('tamanho:', coberturasListFromServer);
+
+
+
+
+      //
+
+      // console.log(store.state.coberturasSpecifQuotate)
+
 
 
 
@@ -180,8 +215,8 @@ export default {
 
 .simplified-propose {
 
-
-  height: 100vh;
+  box-sizing: content-box;
+  max-height: 200vh;
   background: #fff;
   border-radius: 5px;
   border-top-left-radius: 0;
@@ -198,7 +233,6 @@ export default {
 }
 
 .simplified-propose div {
-
 
 
   padding-left: 10%;
@@ -221,6 +255,20 @@ export default {
   margin-top: 5px;
   font-size: 14px;
 
+
+}
+
+.cobertura-list {
+
+  list-style-type: none;
+  padding-bottom: 30px;
+
+}
+
+.cobertura-list strong {
+
+    background-color: #05286A;
+    color: #fff;
 
 }
 
