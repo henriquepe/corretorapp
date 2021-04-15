@@ -2,6 +2,11 @@
 
   <div class="container">
 
+    <loading :active.sync="isLoading"
+          :can-cancel="false"
+          :on-cancel="onCancel"
+          :is-full-page="fullPage"></loading>
+
     <header-component/>
     <router-link to="/proposes" class="left-icon-propose">
         <left-icon size="1.6x" />
@@ -61,12 +66,15 @@
 
 <script>
 import Header from '../components/Header.vue'
+import axios from 'axios';
 import store from '../store/index';
+import Loading from 'vue-loading-overlay';
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Menu from '../components/Menu.vue'
-import router from '../router'
 
-import axios from 'axios';
+import 'vue-loading-overlay/dist/vue-loading.css';
+
+
 
 export default {
   name: 'Propose',
@@ -74,7 +82,8 @@ export default {
   components: {
     'header-component': Header,
     'left-icon': ChevronLeftIcon,
-    'menu-component': Menu
+    'menu-component': Menu,
+    Loading
   },
 
   data() {
@@ -85,6 +94,8 @@ export default {
       cpfCnpj: '',
       proponente: '',
       proposta: '',
+      isLoading: true,
+      fullPage: true,
       followUp: [],
       historico: "Histórico\de\Follow-Up\da\Cotação"
 
@@ -99,33 +110,49 @@ export default {
     this.proponente = propose.nm_pessoa;
     this.proposta = propose.nr_proposta;
 
-    const sessionIdInLocalStorage = localStorage.getItem('@corretor-session-id');
-
-    const { data } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
-      "SessionID": sessionIdInLocalStorage,
-      "screenIdentification":"SASVI0051",
-      "Parameters":[
-        {"parametername":"nr_proposta", "parametervalue": propose.nr_proposta},
-        {"parametername":"cd_tp_consulta","parametervalue":"2"},
-        {"parametername":"dt_inicio","parametervalue":""}
-      ]
-      });
-
-      if(data.ResponseCode === 999 && data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
-
-        await router.replace({path: '/'})
-        alert('Sessão expirada')
-      }
-
-      const followUpList = data.ResponseJSONData;
-
-      this.followUp = followUpList;
-
-    console.log(data);
-
+    await this.buscarFollowUp(propose.nr_proposta);
 
 
   },
+  methods: {
+
+    async buscarFollowUp(numeroProposta){
+
+      console.log('cheguei')
+
+      const sessionIdInLocalStorage = localStorage.getItem('@corretor-session-id');
+
+      const { data } = await axios.post('https://app-sas-hml.omintseguros.com.br/api/SASData/Get_V2', {
+        "SessionID": sessionIdInLocalStorage,
+        "screenIdentification":"SASVI0051",
+        "Parameters":[
+          {"parametername":"nr_proposta", "parametervalue": numeroProposta},
+          {"parametername":"cd_tp_consulta","parametervalue":"2"},
+          {"parametername":"dt_inicio","parametervalue":""}
+        ]
+        });
+
+      if(data.ResponseCode === 999 && data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
+        this.isLoading = false;
+        this.$router.replace({path: '/'})
+        alert('Sessão expirada')
+
+      }
+      else {
+
+        const followUpList = data.ResponseJSONData;
+
+        this.isLoading = false;
+
+        this.followUp = followUpList;
+
+      }
+
+
+
+    }
+
+  }
 
 
 

@@ -1,6 +1,12 @@
 <template>
 
+
   <div class="container">
+
+    <loading :active.sync="isLoading"
+          :can-cancel="false"
+          :on-cancel="onCancel"
+          :is-full-page="fullPage"></loading>
 
     <header-component/>
     <router-link to="/quotations" class="left-icon-propose">
@@ -42,7 +48,7 @@
             <p>{{this.estipulante}}</p>
           </div>
 
-          <ul v-if="state.coberturasSpecifQuotate">
+          <ul class="lista-coberturas" v-if="state.coberturasSpecifQuotate">
             <li v-for="cobertura in state.coberturasSpecifQuotate" :key="cobertura.nm_cobertura" class="cobertura-list">
               <strong>{{cobertura.nm_cobertura}}</strong>
               <p>Valor capital segurado: {{cobertura.vl_capital_segurado}}</p>
@@ -65,8 +71,10 @@
 <script>
 import Header from '../components/Header.vue'
 import store from '../store/index';
+import Loading from 'vue-loading-overlay';
 import { ChevronLeftIcon } from 'vue-feather-icons'
 import Menu from '../components/Menu.vue'
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 import axios from 'axios';
 
@@ -76,7 +84,8 @@ export default {
   components: {
     'header-component': Header,
     'left-icon': ChevronLeftIcon,
-    'menu-component': Menu
+    'menu-component': Menu,
+    Loading
   },
 
   data() {
@@ -92,11 +101,15 @@ export default {
       estipulante: '',
       historico: "Histórico\de\Follow-Up\da\Cotação",
       state: store.state,
+      isLoading: true,
+      fullPage: true
 
     }
   },
 
   created () {
+
+
 
     const quote = store.state.quotes.find(quoteInState => quoteInState.dt_validade === this.id);
     this.status = quote.nm_fase;
@@ -109,6 +122,8 @@ export default {
 
 
     this.handleCoberturasData();
+
+
 
 
   },
@@ -138,12 +153,14 @@ export default {
       if(!coberturasListFromServer.length){
         store.state.coberturasSpecifQuotate.push(coberturasListFromServer);
         console.log(store.state.coberturasSpecifQuotate)
+        this.isLoading = false;
       }
       else {
         store.state.coberturasSpecifQuotate = coberturasListFromServer;
+        this.isLoading = false;
       }
 
-      console.log('tamanho:', coberturasListFromServer);
+
 
 
 
@@ -216,7 +233,7 @@ export default {
 .simplified-propose {
 
   box-sizing: content-box;
-  max-height: 200vh;
+  max-height: 300vh;
   background: #fff;
   border-radius: 5px;
   border-top-left-radius: 0;
@@ -272,6 +289,11 @@ export default {
 
 }
 
+.lista-coberturas {
+
+  height: 100%;
+
+}
 
 
 

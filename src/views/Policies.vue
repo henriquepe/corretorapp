@@ -2,6 +2,11 @@
 
   <div class="container">
 
+    <loading :active.sync="isLoading"
+          :can-cancel="false"
+          :on-cancel="onCancel"
+          :is-full-page="fullPage"></loading>
+
     <header-component/>
 
     <h1>Minhas Apólices</h1>
@@ -17,7 +22,7 @@
 
       <div  class="proposes-box">
 
-        <ul>
+        <ul v-if="state.policies">
           <li v-for="policy in state.policies" :key="policy.nr_apolice">
             <router-link :to="{path: '/policies/' + policy.nr_apolice, params: {id: policy.nr_apolice} }">
               <policy-box   :idProp="policy.nr_apolice" :status="policy.nm_status"  :proponentCPF="policy.nr_CNPJ_sub" :proponentName="policy.nm_estipulante" :proposeNumber="policy.nr_apolice"/>
@@ -25,10 +30,7 @@
           </li>
         </ul>
 
-
-
-
-
+        <p id="mensagem" v-if="!isLoading">{{this.mensagem}}</p>
 
       </div>
 
@@ -52,6 +54,8 @@ import Menu from '../components/Menu.vue';
 import { SearchIcon } from 'vue-feather-icons';
 import PolicyBox from '../components/PolicyBox.vue';
 import axios from 'axios';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 
 import store from '../store/index';
 
@@ -63,7 +67,10 @@ export default {
 
     return {
       state: store.state,
-      policiesArray: store.state.policies
+      policiesArray: store.state.policies,
+      isLoading: true,
+      fullPage: true,
+      mensagem: ''
     }
   },
 
@@ -72,6 +79,7 @@ export default {
     'menu-move': Menu,
     'search-icon': SearchIcon,
     'policy-box': PolicyBox,
+    Loading
   },
 
   methods: {
@@ -94,14 +102,29 @@ export default {
         "Parameters":[ {"parametername": "nr_apolice","parametervalue": ""}, {"parametername": "nr_ramo","parametervalue": ""}, {"parametername": "cd_status","parametervalue": ""}, {"parametername": "nr_cpf","parametervalue": ""}, {"parametername": "nr_bilhete","parametervalue": ""}, {"parametername": "nr_CPF_CNPJ_login","parametervalue": ""}, {"parametername": "nr_contrato","parametervalue": ""}, {"parametername": "nr_sub","parametervalue": ""}, {"parametername": "nm_login","parametervalue": "3131181"} ]})
 
         store.state.policies = data.ResponseJSONData.Apolice_Resumo_table_1;
+
+        if(data.ResponseJSONData.Apolice_Resumo_table_1.length === 0) {
+          this.mensagem = 'não há apolices para listar'
+          this.isLoading = false;
+        }
+        else {
+          this.isLoading = false;
+          return;
+
+        }
+
+
       }
 
       const newPoliciesArray = data.ResponseJSONData.Apolice_Resumo_table_1;
+      this.isLoading = false;
 
       if(this.policiesArray.length === 0){
         this.setPoliciesArray(newPoliciesArray)
+        this.isLoading = false;
       }
       else {
+        this.isLoading = false;
         return;
       }
 
@@ -221,6 +244,12 @@ export default {
 
   .proposes-box li:hover {
     opacity: 0.6;
+  }
+
+  #mensagem {
+    padding-left:  20px;
+    font-size: 14px;
+
   }
 
 
