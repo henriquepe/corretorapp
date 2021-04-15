@@ -2,7 +2,7 @@
   <div class="container">
     <loading :active.sync="isLoading" :can-cancel="false" :on-cancel="onCancel" :is-full-page="fullPage">
     </loading>
-    <form class="content">
+    <form class="content" @submit="submit($event)">
       <header-component/>
       <router-link to="/quotations" class="left-icon">
         <left-icon size="1.6x" />
@@ -47,7 +47,7 @@
 
 
           <label for="renda">Renda Mensal*</label>
-          <input v-on:input="handleRendaInputChange($event)" type="number" placeholder="R$ 0,00" />
+          <input required v-on:input="handleRendaInputChange($event)" type="number" placeholder="R$ 0,00" />
 
           <label  for="data">Data de Nascimento*</label>
           <input v-on:input="handleDateInputChange($event)" type="date"/>
@@ -110,8 +110,16 @@
 
       </div>
 
+      
+
+        <quote-modal v-if="existQuote"   :numeroCotacao="cotacao" :premio="premio"></quote-modal>
+
+     
+
+      
+      
       <div class="confirm-button">
-        <button v-on:click="submit" type="button">CONFIRMAR</button>
+        <button type="submit">CONFIRMAR</button>
       </div>
 
 
@@ -125,6 +133,7 @@
 
 import Header from '../components/Header.vue';
 import Menu from '../components/Menu.vue';
+import QuoteModal from '../components/QuoteModal.vue'
 
 import Vue from 'vue'
 import VueMaterial from 'vue-material';
@@ -146,6 +155,7 @@ export default {
     'header-component': Header,
     'left-icon': ChevronLeftIcon,
     'menu-component': Menu,
+    'quote-modal': QuoteModal,
     Loading
   },
   data: () => {
@@ -155,6 +165,9 @@ export default {
       valueCheckbox: 0,
       product: '',
       contract: '',
+      cotacao: '',
+      premio: '',
+      existQuote: false,
       profession: '',
       cdProduct: '',
       cdContract: '',
@@ -188,7 +201,9 @@ export default {
 
   methods: {
 
-      async submit(){
+      async submit(e){
+
+        e.preventDefault();
 
         this.isLoading = true;
 
@@ -219,7 +234,11 @@ export default {
         });
 
 
+        // console.log(response.data)
+        // console.log(response.data.ResponseJSONData.Simulacao_VI.Infos_Simulacao.sim.nr_cotacao)
+        // console.log(response.data.ResponseJSONData.Simulacao_VI.Premio_Total.Total.vl_premio_total)
 
+        
 
 
         if(response.data.ResponseCode === 999 && response.data.ResponseDescription === "Usuário sem autorização para executar a funcionalidade informada. "){
@@ -229,12 +248,19 @@ export default {
 
         }
 
-        console.log(response.data.ResponseCode === 0);
+        else {
 
-        if(response.data){
-          store.state.quotes = [];
-          router.replace('/quotations')
+          this.isLoading = false;
+
+          this.cotacao = `${response.data.ResponseJSONData.Simulacao_VI.Infos_Simulacao.sim.nr_cotacao}`
+
+          this.premio = `${response.data.ResponseJSONData.Simulacao_VI.Premio_Total.Total.vl_premio_total}`
+
+          this.existQuote = true;
+
         }
+
+        
 
 
       },
