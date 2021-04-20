@@ -47,7 +47,7 @@
 
 
           <label for="renda">Renda Mensal*</label>
-          <input required v-on:input="handleRendaInputChange($event)" type="number" placeholder="R$ 0,00" />
+          <currency-input required currency="BRL" locale="en" v-on:input="handleRendaInputChange($event)" placeholder="R$ 0,00" />
 
           <label  for="data">Data de Nascimento*</label>
           <input v-on:input="handleDateInputChange($event)" type="date"/>
@@ -100,9 +100,9 @@
         <div class="form-proponent">
 
           <ul class="coberturas">
-            <li v-for="cobertura in this.state.coberturas" :key="cobertura.id_produto_cobertura" class="cobertura">
+            <li v-for="(cobertura) in this.state.coberturas" :key="cobertura.id_produto_cobertura" class="cobertura">
               <label for="cobertura">{{cobertura.nm_cobertura}}</label>
-              <input v-on:input="handle($event, cobertura.id_produto_cobertura)" placeholder="0,00" id="input-cobertura" type="text">
+              <currency-input currency="BRL" locale="en" v-on:input="handle($event, cobertura.id_produto_cobertura)" id="input-cobertura"/>
             </li>
           </ul>
 
@@ -111,7 +111,6 @@
       </div>
 
       
-
         <quote-modal v-if="existQuote"   :numeroCotacao="cotacao" :premio="premio"></quote-modal>
 
      
@@ -140,6 +139,7 @@ import VueMaterial from 'vue-material';
 import axios from 'axios';
 import store from '../store';
 import Loading from 'vue-loading-overlay';
+import { CurrencyInput } from 'vue-currency-input'
 
 
 import { ChevronLeftIcon } from 'vue-feather-icons'
@@ -156,7 +156,8 @@ export default {
     'left-icon': ChevronLeftIcon,
     'menu-component': Menu,
     'quote-modal': QuoteModal,
-    Loading
+    Loading,
+    'currency-input': CurrencyInput,
   },
   data: () => {
     return {
@@ -164,6 +165,7 @@ export default {
       state: store.state,
       valueCheckbox: 0,
       product: '',
+      value: 0,
       contract: '',
       cotacao: '',
       premio: '',
@@ -286,7 +288,7 @@ export default {
 
       handleRendaInputChange(e){
 
-        this.renda = e.target.value.toString();
+        this.renda = e.toString();
 
         console.log('renda:', this.renda)
 
@@ -315,6 +317,8 @@ export default {
 
 
       async handle(e, id){
+        console.log('event:', e.toString());
+        console.log('id:', id.toString());
 
         await this.handleChange(e);
 
@@ -322,17 +326,16 @@ export default {
         {"parametername":"cobertura",
           "parameterlist":[
             {"parametername":"id_cobertura", "parametervalue": id.toString() },
-            { "parametername":"vl_capital_segurado", "parametervalue": e.target.value.toString() }
+            { "parametername":"vl_capital_segurado", "parametervalue": e.toString() }
           ]
         }
-
-        console.log('id passado:', id.toString())
 
         const coberturaExists = this.coberturaList.find(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id.toString());
         const coberturaIndexExists = this.coberturaList.findIndex(coberturaInList => coberturaInList.parameterlist[0].parametervalue === id.toString());
 
         if(!coberturaExists){
           this.coberturaList.push(cobertura);
+          console.log(this.coberturaList)
 
         }
         else {
@@ -343,12 +346,14 @@ export default {
 
         }
 
+        console.log(this.coberturaList)
+
       },
 
 
       async handleChange(e){
 
-        this.valorCobertura = e.target.value.toString();
+        this.valorCobertura = e.toString();
 
       },
 

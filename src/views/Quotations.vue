@@ -65,6 +65,7 @@ import router from '../router'
 
 import store from '../store';
 
+
 export default {
   name: 'Quotate',
 

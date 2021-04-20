@@ -8289,6 +8289,11 @@ vue-class-component@^7.2.3:
   resolved "https://registry.yarnpkg.com/vue-class-component/-/vue-class-component-7.2.6.tgz#8471e037b8e4762f5a464686e19e5afc708502e4"
   integrity sha512-+eaQXVrAm/LldalI272PpDe3+i4mPis0ORiMYxF6Ae4hyuCh15W8Idet7wPUEs4N4YptgFHGys4UrgNQOMyO6w==
 
+vue-currency-input@^1.22.6:
+  version "1.22.6"
+  resolved "https://registry.yarnpkg.com/vue-currency-input/-/vue-currency-input-1.22.6.tgz#1fed0dabb8a46a5537daca9371942f3d4f3a08fc"
+  integrity sha512-BUq8aysiZ1pdRyyWyIgxYz4+PBQwgVeAqxNr8ZOGaudA8YqEv2S5Plze0LjI/pbinX4+ma1sIIzStXZPxMy0/Q==
+
 vue-feather-icons@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/vue-feather-icons/-/vue-feather-icons-5.1.0.tgz#db658aca5f4c088c2f725f8b1f2967d4a1e4d398"

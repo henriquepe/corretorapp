@@ -18,7 +18,6 @@
 
       <div class="propose-container">
 
-lili
         <div class="simplified-propose">
 
           <h3>Detalhes</h3>
@@ -51,7 +50,8 @@ lili
           <ul class="lista-coberturas" v-if="state.coberturasSpecifQuotate">
             <li v-for="cobertura in state.coberturasSpecifQuotate" :key="cobertura.nm_cobertura" class="cobertura-list">
               <strong>{{cobertura.nm_cobertura}}</strong>
-              <p>Valor capital segurado: {{cobertura.vl_capital_segurado}}</p>
+              <currency-input class="currency-input" :value="cobertura.vl_capital_segurado" currency="BRL" locale="en" readonly disabled/>
+              <!-- <p>Valor capital segurado: {{cobertura.vl_capital_segurado}}</p> -->
             </li>
           </ul>
 
@@ -73,6 +73,7 @@ import Header from '../components/Header.vue'
 import store from '../store/index';
 import Loading from 'vue-loading-overlay';
 import { ChevronLeftIcon } from 'vue-feather-icons'
+import { CurrencyInput } from 'vue-currency-input'
 import Menu from '../components/Menu.vue'
 import 'vue-loading-overlay/dist/vue-loading.css';
 
@@ -85,7 +86,8 @@ export default {
     'header-component': Header,
     'left-icon': ChevronLeftIcon,
     'menu-component': Menu,
-    Loading
+    Loading,
+    'currency-input': CurrencyInput,
   },
 
   data() {
@@ -276,9 +278,12 @@ export default {
 }
 
 .cobertura-list {
-
+  margin-left: 5px;
   list-style-type: none;
   padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  width: 89%;
 
 }
 
