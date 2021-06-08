@@ -5,10 +5,10 @@
       <home-icon size="2x"/>
       <p>Home</p>
     </router-link>
-    <router-link class="icon-container" to="/simulate">
+    <!-- <router-link class="icon-container" to="/simulate">
       <graph-icon size="2x"/>
       <p>Simulações</p>
-    </router-link>
+    </router-link> -->
     <router-link class="icon-container" to="/quotations">
       <quotation-icon size="2x"/>
       <p>Cotações</p>
@@ -47,9 +47,10 @@ export default {
 <style scoped>
   .container {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important;
+    grid-template-columns: 1fr 1fr 1fr 1fr !important;
     position: fixed !important;
-    top: 90% !important;
+    top: 87% !important;
+    padding-bottom: 80px;
 
 
 

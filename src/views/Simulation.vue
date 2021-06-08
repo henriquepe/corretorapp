@@ -4,7 +4,7 @@
       <header-component/>
       <router-link to="/quotate" class="left-icon">
         <left-icon size="1.6x" />
-        <p>Back</p>
+        <p>Voltar</p>
       </router-link>
 
       <div class="product-contract">

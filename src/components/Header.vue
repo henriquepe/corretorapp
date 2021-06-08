@@ -4,12 +4,29 @@
       src="https://compareplanodesaude.com.br/wp-content/uploads/2020/07/omint-logotipo.jpg"
       alt="omint logo"
     />
+
+    <div v-on:click="handleLogOut" style="position: absolute; right: 20px; cursor: pointer;">
+      <log-out-icon size="1.6x" color="white"></log-out-icon>
+    </div>
   </div>
 </template>
 
 <script>
+
+import { LogOutIcon } from 'vue-feather-icons'
+
 export default {
   name: "Header",
+
+  components: {
+    LogOutIcon
+  },
+
+  methods: {
+    handleLogOut() {
+      this.$router.replace({path: '/'})
+    }
+  }
 };
 </script>
 
