@@ -1,5 +1,10 @@
 <template>
   <div class="container">
+    <loading
+      :active.sync="isLoading"
+      :can-cancel="false"
+      :is-full-page="fullPage"
+    ></loading>
     <header-component />
     <router-link to="/policies" class="left-icon-propose">
       <left-icon size="1.6x" />
@@ -93,6 +98,7 @@ import {
 import Menu from "../components/Menu.vue";
 import axios from "axios";
 import * as jspdf from "jspdf";
+import Loading from "vue-loading-overlay";
 
 export default {
   components: {
@@ -102,7 +108,8 @@ export default {
     "pdf-icon": FileIcon,
     "boleto-icon": FileTextIcon,
     "up-icon": ArrowUpIcon,
-    "down-icon": ArrowDownIcon
+    "down-icon": ArrowDownIcon,
+    Loading
   },
 
   data() {
@@ -115,7 +122,9 @@ export default {
       apolicePDF64: "",
       arrow: false,
       state: store.state,
-      mensagem: "carregando..."
+      mensagem: "carregando...",
+      isLoading: false,
+      fullPage: true
 
       // vl_total: '',
       // dt_vencimento: '',
@@ -163,7 +172,9 @@ export default {
       }
     },
 
-    openBoletoPDF(nr_parcela) {
+    async openBoletoPDF(nr_parcela) {
+      this.isLoading = true;
+
       const sessionIdInLocalStorage = localStorage.getItem(
         "@corretor-session-id"
       );
@@ -185,32 +196,34 @@ export default {
           ]
         })
         .then(response => {
-          if (
-            response.data.ResponseJSONData.Apolice_Parcela_table_1.length === 0
-          ) {
-            alert("Não há parcelas para listar");
-          } else {
-            console.log(
-              "data.ResponseJSONData.Apolice_Parcela_table_1",
-              data.ResponseJSONData.Apolice_Parcela_table_1
-            );
-            // ValidaBOL
-          }
+          let boleto64 =
+            response.data.ResponseJSONData.Apolice_Parcela_table_1[0].ValidaBOL
+              .form_boleto.form_boleto;
+
+          setTimeout(() => {
+            try {
+              let pdfWindow = window.open("");
+
+              pdfWindow.document.write(
+                "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
+                  encodeURI(boleto64) +
+                  "'></iframe>"
+              );
+              this.isLoading = false;
+            } catch (err) {
+              alert(
+                "Caso seu navegador esteja bloqueando pop-ups, habilite para que ele possa exibir seu boleto."
+              );
+              this.isLoading = false;
+            }
+          }, 3000);
         });
 
-      // if (!this.apolice) {
-      //   alert(
-      //     "PDF ainda não foi carregado ou inexistente, aguarde um pouco e tente novamente."
-      //   );
-      //   return;
-      // } else {
-      //   let pdfWindow = window.open("");
-      //   pdfWindow.document.write(
-      //     "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
-      //       encodeURI(this.apolicePDF64) +
-      //       "'></iframe>"
-      //   );
-      // }
+      // console.log(
+      //   "base64",
+      //   response.data.ResponseJSONData.Apolice_Parcela_table_1[0].ValidaBOL
+      //     .form_boleto.form_boleto
+      // );
     },
 
     async verifyExistentPolicy() {
