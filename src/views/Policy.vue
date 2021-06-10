@@ -35,15 +35,29 @@
           class="parcelas-list"
         >
           <li
-            v-for="(parcela, index) in state.premio"
-            :key="index"
+            v-for="parcela in state.premio"
+            :key="parcela.nr_parcela"
             class="parcelas-status"
           >
             <div>
               <strong>R$ {{ parcela.vl_total }}</strong>
               <div id="date-status">
-                <p>{{ parcela.nr_parcela }} - {{ parcela.dt_vencimento }} -</p>
-                <strong>{{ parcela.nm_status_parcela }}</strong>
+                <div style="display: flex;">
+                  <p>
+                    {{ parcela.nr_parcela }} - {{ parcela.dt_vencimento }} -
+                  </p>
+                  <strong>{{ parcela.nm_status_parcela }}</strong>
+                </div>
+                <button
+                  v-if="
+                    parcela.nm_status_parcela === 'Pendente' &&
+                      parcela.dv_pdf_BOL > 0
+                  "
+                  v-on:click="openBoletoPDF(parcela.nr_parcela)"
+                  target="_blank"
+                >
+                  <boleto-icon size="2.5x" />
+                </button>
               </div>
             </div>
           </li>
@@ -73,7 +87,8 @@ import {
   ChevronLeftIcon,
   FileIcon,
   ArrowDownIcon,
-  ArrowUpIcon
+  ArrowUpIcon,
+  FileTextIcon
 } from "vue-feather-icons";
 import Menu from "../components/Menu.vue";
 import axios from "axios";
@@ -85,6 +100,7 @@ export default {
     "left-icon": ChevronLeftIcon,
     "menu-component": Menu,
     "pdf-icon": FileIcon,
+    "boleto-icon": FileTextIcon,
     "up-icon": ArrowUpIcon,
     "down-icon": ArrowDownIcon
   },
@@ -147,6 +163,56 @@ export default {
       }
     },
 
+    openBoletoPDF(nr_parcela) {
+      const sessionIdInLocalStorage = localStorage.getItem(
+        "@corretor-session-id"
+      );
+
+      axios
+        .post("https://app-sas.omintseguros.com.br/api/SASData/Get_V2", {
+          SessionID: sessionIdInLocalStorage,
+          screenIdentification: "SASVI0119A",
+          Parameters: [
+            { parametername: "nr_apolice", parametervalue: this.apolice },
+            { parametername: "nr_parcela", parametervalue: `${nr_parcela}` },
+            { parametername: "nm_status", parametervalue: "" },
+            { parametername: "nr_cpf", parametervalue: "" },
+            { parametername: "nr_contrato", parametervalue: "" },
+            { parametername: "nr_ramo", parametervalue: "" },
+            { parametername: "nr_sub", parametervalue: "" },
+            { parametername: "nr_CPF_CNPJ_login", parametervalue: "" },
+            { parametername: "nm_login", parametervalue: this.state.usuario }
+          ]
+        })
+        .then(response => {
+          if (
+            response.data.ResponseJSONData.Apolice_Parcela_table_1.length === 0
+          ) {
+            alert("Não há parcelas para listar");
+          } else {
+            console.log(
+              "data.ResponseJSONData.Apolice_Parcela_table_1",
+              data.ResponseJSONData.Apolice_Parcela_table_1
+            );
+            // ValidaBOL
+          }
+        });
+
+      // if (!this.apolice) {
+      //   alert(
+      //     "PDF ainda não foi carregado ou inexistente, aguarde um pouco e tente novamente."
+      //   );
+      //   return;
+      // } else {
+      //   let pdfWindow = window.open("");
+      //   pdfWindow.document.write(
+      //     "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
+      //       encodeURI(this.apolicePDF64) +
+      //       "'></iframe>"
+      //   );
+      // }
+    },
+
     async verifyExistentPolicy() {
       const sessionIdInLocalStorage = localStorage.getItem(
         "@corretor-session-id"
@@ -178,13 +244,15 @@ export default {
       ) {
         this.apolicePDF64 =
           DataPdfApolice.ResponseJSONData.Apolice_Resumo_table_1[0].ValidaRamoVI.form_apolice_vi.form_apolice_vi;
+      }
 
-        console.log(
-          JSON.stringify(
-            DataPdfApolice.ResponseJSONData.Apolice_Resumo_table_1[0]
-              .ValidaRamoVI.form_apolice_vi.form_apolice_vi
-          )
-        );
+      if (
+        Object.keys(
+          DataPdfApolice.ResponseJSONData.Apolice_Resumo_table_1[0].ValidaRamoVP
+        ).length !== 0
+      ) {
+        this.apolicePDF64 =
+          DataPdfApolice.ResponseJSONData.Apolice_Resumo_table_1[0].ValidaRamoVP.form_apolice_vp.form_apolice_vp;
       }
 
       const { data } = await axios.post(
@@ -193,7 +261,7 @@ export default {
           SessionID: sessionIdInLocalStorage,
           screenIdentification: "SASVI0119A",
           Parameters: [
-            { parametername: "nr_apolice", parametervalue: "" },
+            { parametername: "nr_apolice", parametervalue: this.apolice },
             { parametername: "nr_parcela", parametervalue: "" },
             { parametername: "nm_status", parametervalue: "" },
             { parametername: "nr_cpf", parametervalue: "" },
@@ -403,6 +471,7 @@ export default {
   display: flex;
   align-items: center;
   padding-bottom: 20px;
+  justify-content: space-between;
 }
 
 #date-status p {
