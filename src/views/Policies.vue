@@ -71,16 +71,20 @@ export default {
       isLoading: true,
       fullPage: true,
       mensagem: "",
-      searchInput: ''
+      searchInput: ""
     };
   },
 
   computed: {
     filtredItems() {
-      console.log(this.state.quotes)
       return this.state.policies.filter(item => {
-        return item.nm_status?.indexOf(this.searchInput) > -1 || item.nr_apolice?.indexOf(this.searchInput) > -1 || String(item.nr_CNPJ_sub)?.indexOf(this.searchInput) > -1 || item.nm_estipulante?.indexOf(this.searchInput) > -1
-      })
+        return (
+          item.nm_status?.indexOf(this.searchInput) > -1 ||
+          item.nr_apolice?.indexOf(this.searchInput) > -1 ||
+          String(item.nr_CNPJ_sub)?.indexOf(this.searchInput) > -1 ||
+          item.nm_estipulante?.indexOf(this.searchInput) > -1
+        );
+      });
     }
   },
 
@@ -93,8 +97,6 @@ export default {
   },
 
   methods: {
-    
-
     async verifyExistentProposes() {
       const sessionIdInLocalStorage = localStorage.getItem(
         "@corretor-session-id"
@@ -120,10 +122,12 @@ export default {
           }
         );
 
+        store.state.policies =
+          response.data.ResponseJSONData.Apolice_Resumo_table_1;
 
-        store.state.policies = response.data.ResponseJSONData.Apolice_Resumo_table_1;
-
-        if (response.data.ResponseJSONData.Apolice_Resumo_table_1.length === 0) {
+        if (
+          response.data.ResponseJSONData.Apolice_Resumo_table_1.length === 0
+        ) {
           this.mensagem = "não há apolices para listar";
           this.isLoading = false;
         } else {

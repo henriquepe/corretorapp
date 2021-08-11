@@ -151,19 +151,16 @@ export default {
   methods: {
     handleChangeArrow() {
       this.arrow = !this.arrow;
-      console.log(this.arrow);
     },
 
     openPolicyPDF() {
-      console.log(this.apolicePDF64);
-
       if (!this.apolicePDF64) {
         alert(
           "PDF ainda não foi carregado ou inexistente, aguarde um pouco e tente novamente."
         );
         return;
       } else {
-        let pdfWindow = window.open("");
+        let pdfWindow = window.open("", "_blank");
         pdfWindow.document.write(
           "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
             encodeURI(this.apolicePDF64) +
@@ -202,7 +199,7 @@ export default {
 
           setTimeout(() => {
             try {
-              let pdfWindow = window.open("");
+              let pdfWindow = window.open("", "_blank");
 
               pdfWindow.document.write(
                 "<iframe width='100%' height='100%' src='data:application/pdf;base64, " +
@@ -218,12 +215,6 @@ export default {
             }
           }, 3000);
         });
-
-      // console.log(
-      //   "base64",
-      //   response.data.ResponseJSONData.Apolice_Parcela_table_1[0].ValidaBOL
-      //     .form_boleto.form_boleto
-      // );
     },
 
     async verifyExistentPolicy() {
@@ -292,8 +283,6 @@ export default {
       }
 
       store.state.premio = data.ResponseJSONData.Apolice_Parcela_table_1;
-
-      console.log("store.state.premio", store.state.premio);
     }
   }
 };
